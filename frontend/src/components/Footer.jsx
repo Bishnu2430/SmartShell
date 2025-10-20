@@ -16,20 +16,15 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import RecentPage from "./pages/RecentPage";
-import ProductCard from "./components/ProductCard";
 
-// Styles
 import "./App.css";
 
 const App = () => {
   return (
     <AppProvider>
       <Router>
-        <div className="app-container flex flex-col min-h-screen">
-          {/* Navbar */}
+        <div className="flex flex-col min-h-screen">
           <NavBar />
-
-          {/* Main Content */}
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -39,11 +34,8 @@ const App = () => {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/recent" element={<RecentPage />} />
-              <Route path="/product" element={<ProductCard />} />
             </Routes>
           </main>
-
-          {/* Footer */}
           <Footer />
         </div>
       </Router>
