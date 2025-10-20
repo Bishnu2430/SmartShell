@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ShoppingCart,
-  X,
   CreditCard,
   Leaf,
   Plus,
@@ -9,90 +8,70 @@ import {
   Trash2,
   ArrowRight,
 } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 function CartPage() {
-  const [cart, setCart] = useState([]);
-  const [greenCoins, setGreenCoins] = useState(0);
+  const { cart, removeFromCart, addToCart, setUser } = useAppContext();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
-  useEffect(() => {
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  useEffect(() => {
-    // Save cart to localStorage
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+  const clearCart = () => {
+    localStorage.removeItem("cart");
+    window.location.reload();
+  };
 
   const updateQuantity = (productId, delta) => {
-    setCart(
-      cart.map((item) => {
-        if (item.id === productId) {
-          const newQty = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQty };
-        }
-        return item;
-      })
-    );
+    const item = cart.find((i) => i.id === productId);
+    if (!item) return;
+    if (delta === 1) addToCart(item);
+    else if (delta === -1 && item.quantity > 1) {
+      const updated = cart.map((p) =>
+        p.id === productId ? { ...p, quantity: p.quantity - 1 } : p
+      );
+      localStorage.setItem("cart", JSON.stringify(updated));
+      window.location.reload();
+    }
   };
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter((item) => item.id !== productId));
-  };
+  const getTotalPrice = () =>
+    cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const clearCart = () => {
-    setCart([]);
-  };
-
-  const getTotalPrice = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  };
-
-  const getTotalCoins = () => {
-    return Math.floor(getTotalPrice() * 0.1);
-  };
-
-  const getTotalItems = () => {
-    return cart.reduce((sum, item) => sum + item.quantity, 0);
-  };
+  const getTotalCoins = () => Math.floor(getTotalPrice() * 0.1);
+  const getTotalItems = () =>
+    cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
-    const coins = getTotalCoins();
-    setGreenCoins((prev) => prev + coins);
     setShowCheckoutModal(true);
     setTimeout(() => {
       setShowCheckoutModal(false);
       clearCart();
       window.location.href = "/dashboard";
-    }, 3000);
+    }, 2500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-28 pb-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        {/* Header */}
+        <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Shopping Cart
+            🛒 Your Shopping Cart
           </h1>
           <p className="text-gray-600">
             {cart.length === 0
               ? "Your cart is empty"
-              : `${getTotalItems()} items in your cart`}
+              : `${getTotalItems()} item(s) in your cart`}
           </p>
         </div>
 
+        {/* Empty Cart */}
         {cart.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-            <ShoppingCart className="w-24 h-24 text-gray-400 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          <div className="bg-white rounded-xl shadow-lg p-12 text-center animate-fadeIn">
+            <ShoppingCart className="w-24 h-24 text-gray-300 mx-auto mb-6" />
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
               Your cart is empty
             </h2>
             <p className="text-gray-600 mb-6">
-              Looks like you haven't added anything to your cart yet
+              Looks like you haven’t added anything yet.
             </p>
             <a
               href="/shop"
@@ -102,7 +81,7 @@ function CartPage() {
             </a>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
@@ -110,22 +89,22 @@ function CartPage() {
                   key={item.id}
                   className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
                 >
-                  <div className="flex items-center gap-6">
-                    {/* Product Image */}
+                  <div className="flex flex-col md:flex-row items-center gap-6">
+                    {/* Image */}
                     <div className="bg-gradient-to-br from-green-100 to-blue-100 p-6 rounded-lg text-5xl flex-shrink-0">
                       {item.image}
                     </div>
 
-                    {/* Product Info */}
-                    <div className="flex-grow">
+                    {/* Info */}
+                    <div className="flex-grow text-center md:text-left">
                       <h3 className="text-xl font-bold text-gray-800 mb-1">
                         {item.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3">
+                      <p className="text-sm text-gray-600 mb-2">
                         {item.description}
                       </p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="px-2 py-1 bg-gray-100 rounded">
+                      <div className="flex justify-center md:justify-start items-center gap-2 text-sm text-gray-500">
+                        <span className="px-2 py-1 bg-gray-100 rounded capitalize">
                           {item.category}
                         </span>
                         <span className="flex items-center gap-1 text-green-600">
@@ -135,8 +114,8 @@ function CartPage() {
                       </div>
                     </div>
 
-                    {/* Price and Quantity */}
-                    <div className="flex flex-col items-end gap-4">
+                    {/* Quantity & Price */}
+                    <div className="flex flex-col items-center md:items-end gap-4">
                       <div className="text-right">
                         <div className="text-2xl font-bold text-green-600">
                           ₹{(item.price * item.quantity).toFixed(0)}
@@ -146,7 +125,7 @@ function CartPage() {
                         </div>
                       </div>
 
-                      {/* Quantity Controls */}
+                      {/* Controls */}
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => updateQuantity(item.id, -1)}
@@ -154,7 +133,7 @@ function CartPage() {
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="w-12 text-center font-bold text-lg">
+                        <span className="w-10 text-center font-semibold text-lg">
                           {item.quantity}
                         </span>
                         <button
@@ -165,7 +144,6 @@ function CartPage() {
                         </button>
                       </div>
 
-                      {/* Remove Button */}
                       <button
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-600 hover:text-red-800 transition flex items-center gap-1 text-sm"
@@ -179,9 +157,9 @@ function CartPage() {
               ))}
             </div>
 
-            {/* Order Summary */}
+            {/* Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-28">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
                   Order Summary
                 </h2>
@@ -191,12 +169,10 @@ function CartPage() {
                     <span>Subtotal ({getTotalItems()} items):</span>
                     <span className="font-semibold">₹{getTotalPrice()}</span>
                   </div>
-
                   <div className="flex justify-between text-gray-700">
                     <span>Shipping:</span>
                     <span className="font-semibold text-green-600">FREE</span>
                   </div>
-
                   <div className="border-t pt-4">
                     <div className="flex justify-between text-xl font-bold text-gray-900">
                       <span>Total:</span>
@@ -205,9 +181,9 @@ function CartPage() {
                   </div>
                 </div>
 
-                {/* Green Coins */}
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-center justify-between mb-2">
+                {/* Coins */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <div className="flex justify-between items-center mb-2">
                     <span className="font-semibold text-gray-700 flex items-center gap-2">
                       <Leaf className="w-5 h-5 text-green-600" />
                       Green Coins Earned:
@@ -217,38 +193,17 @@ function CartPage() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    🌳 Plants{" "}
+                    🌳 You’ll help plant{" "}
                     <strong>{Math.ceil(getTotalCoins() / 10)} trees</strong>
                   </p>
                 </div>
 
-                {/* Environmental Impact */}
-                <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                  <h3 className="font-semibold text-gray-800 mb-2">
-                    🌍 Your Environmental Impact
-                  </h3>
-                  <ul className="text-sm text-gray-700 space-y-1">
-                    <li>
-                      • CO₂ Offset: ~{(getTotalCoins() * 0.5).toFixed(1)} kg
-                    </li>
-                    <li>
-                      • Oxygen Production: ~{(getTotalCoins() * 0.3).toFixed(1)}{" "}
-                      kg/year
-                    </li>
-                    <li>• Wildlife Habitat Support</li>
-                  </ul>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Coins auto-sent to govt tree plantation programs
-                  </p>
-                </div>
-
-                {/* Checkout Button */}
                 <button
                   onClick={handleCheckout}
                   className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:from-green-700 hover:to-blue-700 transition transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
                 >
                   <CreditCard className="w-6 h-6" />
-                  Proceed to Payment
+                  Proceed to Checkout
                   <ArrowRight className="w-5 h-5" />
                 </button>
 
@@ -260,10 +215,10 @@ function CartPage() {
           </div>
         )}
 
-        {/* Checkout Success Modal */}
+        {/* Success Modal */}
         {showCheckoutModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center animate-bounce-in">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl animate-bounceIn">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="w-10 h-10 text-green-600"
@@ -280,10 +235,10 @@ function CartPage() {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Order Placed! 🎉
+                Order Confirmed! 🎉
               </h2>
               <p className="text-gray-600 mb-4">
-                Your order has been confirmed
+                Your order has been placed successfully.
               </p>
               <div className="bg-green-50 rounded-lg p-4 mb-4">
                 <p className="font-semibold text-green-800">

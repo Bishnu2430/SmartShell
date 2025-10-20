@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Filter, Search } from "lucide-react";
 import ProductCard from "../components/ProductCard";
+import { useAppContext } from "../context/AppContext"; // ✅ Import context
 
 const API_URL = "http://localhost:5000/api";
 
 function ShopPage() {
+  const { addToCart } = useAppContext(); // ✅ Use global addToCart
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentData, setCurrentData] = useState(null);
@@ -145,8 +147,9 @@ function ShopPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-[72px] pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Health Protection Shop
@@ -157,38 +160,34 @@ function ShopPage() {
         </div>
 
         {/* Air Quality Alert Banner */}
-        {currentData &&
-          currentData.analysis &&
-          currentData.analysis.status !== "safe" && (
-            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-orange-500 p-4 mb-8 rounded-lg shadow-md animate-pulse">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div>
-                  <p className="text-orange-800 font-semibold">
-                    Poor air quality detected! Protective equipment highly
-                    recommended.
-                  </p>
-                  <p className="text-sm text-orange-700 mt-1">
-                    Current AQI: {currentData.analysis.issues?.length || 0}{" "}
-                    parameters outside safe range
-                  </p>
-                </div>
+        {currentData?.analysis?.status !== "safe" && (
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-orange-500 p-4 mb-8 rounded-lg shadow-md animate-pulse">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-orange-800 font-semibold">
+                  Poor air quality detected! Protective equipment highly
+                  recommended.
+                </p>
+                <p className="text-sm text-orange-700 mt-1">
+                  Current AQI: {currentData?.analysis?.issues?.length || 0}{" "}
+                  parameters outside safe range
+                </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
+        <div className="mb-6 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
         </div>
 
         {/* Category Filter */}
@@ -218,9 +217,13 @@ function ShopPage() {
 
         {/* Products Grid */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={() => addToCart(product)} // ✅ Pass handler
+              />
             ))}
           </div>
         ) : (

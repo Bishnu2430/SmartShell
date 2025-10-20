@@ -16,7 +16,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import RecentPage from "./pages/RecentPage";
-import ProductCard from "./components/ProductCard";
+import ShopPage from "./pages/ShopPage";
+import ContactPage from "./pages/ContactPage";
 
 // Styles
 import "./App.css";
@@ -34,12 +35,13 @@ const App = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/shop" element={<ShopPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/recent" element={<RecentPage />} />
-              <Route path="/product" element={<ProductCard />} />
             </Routes>
           </main>
 
