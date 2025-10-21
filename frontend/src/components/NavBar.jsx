@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ShoppingCart, Wind } from "lucide-react";
+import { Menu, X, ShoppingCart, Wind, LogOut } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 
 const NavBar = () => {
-  const { user, cart } = useAppContext();
+  const { user, cart, logoutUser } = useAppContext(); // <-- Added logout
   const [menuOpen, setMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -14,10 +14,8 @@ const NavBar = () => {
   useEffect(() => {
     const controlNavbar = () => {
       if (window.scrollY > lastScrollY && window.scrollY > 100) {
-        // scrolling down
         setVisible(false);
       } else {
-        // scrolling up
         setVisible(true);
       }
       setLastScrollY(window.scrollY);
@@ -36,7 +34,7 @@ const NavBar = () => {
           ? "bg-gradient-to-r from-green-700/90 to-blue-700/90 shadow-lg backdrop-blur-lg"
           : "bg-transparent"
       }`}
-      onMouseEnter={() => setVisible(true)} // reappear when hover near top
+      onMouseEnter={() => setVisible(true)}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
@@ -77,9 +75,18 @@ const NavBar = () => {
             <span>({cart?.length || 0})</span>
           </Link>
 
-          {/* Login / Greeting */}
+          {/* Login / Greeting + Logout */}
           {user ? (
-            <span className="italic text-green-300">Hi, {user.name}</span>
+            <div className="flex items-center gap-4">
+              <span className="italic text-green-300">Hi, {user.name}</span>
+              <button
+                onClick={logoutUser}
+                className="flex items-center gap-1 text-red-400 hover:text-red-300 transition"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
           ) : (
             <Link
               to="/login"
@@ -130,8 +137,21 @@ const NavBar = () => {
               <span>Cart ({cart?.length || 0})</span>
             </Link>
 
+            {/* Login / Logout for mobile */}
             {user ? (
-              <span className="italic text-green-300">Hi, {user.name}</span>
+              <>
+                <span className="italic text-green-300">Hi, {user.name}</span>
+                <button
+                  onClick={() => {
+                    logoutUser();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 text-red-400 hover:text-red-300 transition"
+                >
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </button>
+              </>
             ) : (
               <Link
                 to="/login"
