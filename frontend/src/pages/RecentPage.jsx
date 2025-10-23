@@ -36,7 +36,10 @@ const RecentPage = () => {
         dataset = data.data.map((item) => ({
           timestamp: new Date(item.timestamp).toLocaleString(),
           pm25: addVariance(item.pm25 || Math.random() * 60 + 10, 5),
-          co2: addVariance(item.co2 || Math.random() * 700 + 400, 30),
+          co2: Math.max(
+            0,
+            addVariance(item.co2 || Math.random() * 700 + 400, 30)
+          ),
           co: addVariance(item.co || Math.random() * 2.5 + 0.2, 0.3),
           no2: addVariance(item.no2 || Math.random() * 120 + 20, 5),
           temperature: addVariance(
@@ -53,7 +56,7 @@ const RecentPage = () => {
           return {
             timestamp: time.toLocaleString(),
             pm25: addVariance(Math.random() * 80 + 10, 6),
-            co2: addVariance(Math.random() * 800 + 400, 40),
+            co2: Math.max(0, addVariance(Math.random() * 800 + 400, 40)),
             co: addVariance(Math.random() * 2.5 + 0.2, 0.3),
             no2: addVariance(Math.random() * 120 + 20, 5),
             temperature: addVariance(Math.random() * 13 + 25, 1),

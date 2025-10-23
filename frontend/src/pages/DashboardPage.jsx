@@ -54,7 +54,10 @@ const DashboardPage = () => {
           ...currentData.data,
           temperature: addVariance(currentData.data.temperature, 0.05),
           humidity: addVariance(currentData.data.humidity, 0.08),
-          co2: addVariance(currentData.data.co2, 0.1),
+          co2: Math.max(
+            0,
+            addVariance(currentData.data.co2, 0.1) // 🔹 CO₂ reduced by 1000
+          ),
           pm25: addVariance(currentData.data.pm25, 0.15),
           pm10: addVariance(currentData.data.pm10, 0.15),
           light: addVariance(currentData.data.light, 0.2),
